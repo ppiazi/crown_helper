@@ -66,7 +66,7 @@ class CrownExeHelper:
     """
     def start(self, cmd, iteration):
         for st in self.strategy_list:
-            self.run_crown(cmd, iter, st)
+            self.run_crown(cmd, iteration, st)
         
         run_flag = {}
         for k in self.strategy_list:
@@ -90,10 +90,17 @@ class CrownExeHelper:
                 break
 
             time.sleep(1)
+
+"""
+사용법에 대한 내용을 콘솔에 출력한다.
+"""
 def print_usage():
-    pass
+    print("FilesInfoReader.py [-f <folder>] [-c <executable command>] [-i <iteration count>]")
+    print("    Author %s" % __author__)
+    print("    Version %s" % __version__)
 
 if __name__ == "__main__":
+    print("Hello World")
     p_target = None
     p_cmd = None
     p_iter = 100
