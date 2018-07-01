@@ -43,7 +43,7 @@ class CrownExeHelper:
         print("Copying directories...")
         for st in self.strategy_list:
             ts = time.time()
-            new_folder = target_dir + st + "-" + datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
+            new_folder = target_dir + st + "-" + str(iteration) + "-" + datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
             print("\tCopying %s" % new_folder)
             shutil.copytree(target_dir, new_folder)
             self.workspace_list[st] = new_folder
