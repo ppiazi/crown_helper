@@ -53,8 +53,8 @@ class CrownExeHelper:
     """
     def run_crown(self, cmd, iteration, strategy):
         cwd_str = self.workspace_list[strategy]
-        cmd_str = "Starting %s %d %s at %s" % (cmd, iteration, strategy, cwd_str)
-        print(cmd_str)
+        cmd_str = "%s %d %s at %s" % (cmd, iteration, strategy, cwd_str)
+        print("\tStarting " + cmd_str)
         output_file = open(cmd + strategy + ".result.txt", "wb")
         proc = subprocess.Popen(['run_crown', cmd, str(iteration), strategy], stdout=output_file, stderr=output_file, cwd=cwd_str)
         self.proc_list[strategy] = (proc, cmd_str)
@@ -65,6 +65,7 @@ class CrownExeHelper:
     subprocess 들의 작업이 종료될때까지 기다린다.
     """
     def start(self, cmd, iteration):
+        print("Starting run_crown...")
         for st in self.strategy_list:
             self.run_crown(cmd, iteration, st)
         
@@ -77,7 +78,7 @@ class CrownExeHelper:
                 proc_handle = self.proc_list[proc_st][0]
                 proc_cmd_str = self.proc_list[proc_st][1]
                 if run_flag[proc_st] == True and proc_handle.poll() != None:
-                    print("Finished %s" % (proc_cmd_str))
+                    print("\tFinished %s" % (proc_cmd_str))
                     self.file_list[proc_st].flush()
                     self.file_list[proc_st].close()
                     run_flag[proc_st] = False
@@ -100,7 +101,6 @@ def print_usage():
     print("    Version %s" % __version__)
 
 if __name__ == "__main__":
-    print("Hello World")
     p_target = None
     p_cmd = None
     p_iter = 100
