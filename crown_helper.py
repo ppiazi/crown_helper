@@ -19,6 +19,9 @@ import datetime
 import shutil
 import getopt
 
+__author__ = "ppiazi"
+__version__ = "v0.0.1"
+
 class CrownExeHelper:
     """
     내부변수들을 초기화한다.
@@ -36,13 +39,13 @@ class CrownExeHelper:
     """
     crown을 실행하기 위해 search strategy 별로 임시 workspace를 생성한다.
     """
-    def init_workspace(self, dir, cmd, iteration):
+    def init_workspace(self, target_dir, cmd, iteration):
         print("Copying directories...")
         for st in self.strategy_list:
             ts = time.time()
-            new_folder = dir + st + "-" + datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
+            new_folder = target_dir + st + "-" + datetime.datetime.fromtimestamp(ts).strftime('%Y-%m-%d_%H:%M:%S')
             print("\tCopying %s" % new_folder)
-            shutil.copytree(target, new_folder)
+            shutil.copytree(target_dir, new_folder)
             self.workspace_list[st] = new_folder
     """
     주어진 command, iteration, search strategy를 기반으로 subprocess를 실행한다.
@@ -87,13 +90,35 @@ class CrownExeHelper:
                 break
 
             time.sleep(1)
+def print_usage():
+    pass
 
 if __name__ == "__main__":
-    target = sys.argv[1]
-    cmd = sys.argv[2]
-    iter = int(sys.argv[3])
+    p_target = None
+    p_cmd = None
+    p_iter = 100
+
+    optlist, args = getopt.getopt(sys.argv[1:], "f:c:i:")
+
+    for op, p in optlist:
+        if op == "-f":
+            p_target = p
+        elif op == "-c":
+            p_cmd = p
+        elif op == "-i":
+            try:
+                tmp_int = int(p)
+                p_iter = tmp_int
+            except:
+                print("Invalid iteration count : %s" % p)
+        else:
+            print("Invalid argument : " % (op, p))
+    
+    if p_target == None or p_cmd == None:
+        print_usage()
+        os._exit(1)
 
     ceh = CrownExeHelper()
 
-    ceh.init_workspace(target, cmd, iter)
-    ceh.start(cmd, iter)
+    ceh.init_workspace(p_target, p_cmd, p_iter)
+    ceh.start(p_cmd, p_iter)
