@@ -18,6 +18,8 @@ import time
 import datetime
 import shutil
 import getopt
+import crown_result_parser
+import xlsxwriter
 
 __author__ = "ppiazi"
 __version__ = "v0.0.1"
@@ -34,6 +36,7 @@ class CrownExeHelper:
         self.proc_list = {}
         self.workspace_list = {}
         self.file_list = {}
+        self.file_name_list = {}
         self.strategy_list = ['-dfs', '-cfg', '-hybrid', '-random']
 
     """
@@ -55,10 +58,14 @@ class CrownExeHelper:
         cwd_str = self.workspace_list[strategy]
         cmd_str = "%s %d %s at %s" % (cmd, iteration, strategy, cwd_str)
         print("\tStarting " + cmd_str)
-        output_file = open(cmd + strategy + ".result.txt", "wb")
-        proc = subprocess.Popen(['run_crown', cmd, str(iteration), strategy], stdout=output_file, stderr=output_file, cwd=cwd_str)
-        self.proc_list[strategy] = (proc, cmd_str)
+
+        result_file_name = cmd + strategy + ".result.txt"
+        output_file = open(result_file_name, "wb")
+        self.file_name_list[strategy] = result_file_name
         self.file_list[strategy] = output_file
+        
+        proc = subprocess.Popen(['run_crown', cmd, str(iteration), strategy], stdout=output_file, stderr=output_file, cwd=cwd_str)
+        self.proc_list[strategy] = (proc, cmd_str)        
 
     """
     search strategy 별로 수행 process를 생성하여 병렬로 진행한다.
@@ -91,6 +98,50 @@ class CrownExeHelper:
                 break
 
             time.sleep(1)
+    
+    """
+    run_crown의 결과 파일을 읽어 내부 데이터로 변환한다.
+    """
+    def gather_result(self):
+        print("Gathering results...")
+        result_per_ss = {}
+
+        for st in self.file_name_list.keys():
+            result_file_name = self.file_name_list[st]
+            print("\tParsing %s" % result_file_name)
+            tmp_list = crown_result_parser.parse(result_file_name)
+            result_per_ss[st] = tmp_list
+
+        return result_per_ss
+
+    """
+    run_crown의 결과 파일을 읽어 내부 데이터를 엑셀 파일로 저장한다.
+    """    
+    def save_result(self, output_file):
+        wbk = xlsxwriter.Workbook(output_file)
+        sheet = wbk.add_worksheet("result")
+
+        rst = self.gather_result()
+
+        sheet.write(0, 0, "Iteration")
+        i = 1
+        max_iter = 0
+        for st in rst.keys():
+            sheet.write(0, i, st)
+            i = i + 1
+            if len(rst[st]) > max_iter:
+                max_iter = len(rst[st])
+
+        for i in range(0, max_iter):
+            row = i + 1
+            sheet.write(row, 0, i + 1)
+
+            col = 1
+            for st in rst.keys():
+                sheet.write(row, col, rst[st][i][1])
+                col = col + 1
+
+        wbk.close()
 
 """
 사용법에 대한 내용을 콘솔에 출력한다.
@@ -129,3 +180,4 @@ if __name__ == "__main__":
 
     ceh.init_workspace(p_target, p_cmd, p_iter)
     ceh.start(p_cmd, p_iter)
+    ceh.save_result("result.xlsx")
