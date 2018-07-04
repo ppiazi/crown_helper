@@ -63,10 +63,10 @@ class CrownExeHelper:
         stderr_result_file_name = cmd + strategy + ".stderr.result.txt"
         stdoutput_file = open(stdout_result_file_name, "wb")
         stderr_file = open(stderr_result_file_name, "wb")
-        self.file_name_list[strategy] = stdout_result_file_name
+        self.file_name_list[strategy] = stderr_result_file_name
         self.file_list[strategy] = (stdoutput_file, stderr_file)
         
-        proc = subprocess.Popen(['run_crown', cmd, str(iteration), strategy], stdout=stdoutput_file, stderr=stderr_file, cwd=cwd_str)
+        proc = subprocess.Popen(['run_crown', cmd, str(iteration), strategy, "-TCDIR", "tcdir"], stdout=stdoutput_file, stderr=stderr_file, cwd=cwd_str)
         self.proc_list[strategy] = (proc, cmd_str)        
 
     """
