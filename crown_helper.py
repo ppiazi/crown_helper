@@ -59,12 +59,14 @@ class CrownExeHelper:
         cmd_str = "%s %d %s at %s" % (cmd, iteration, strategy, cwd_str)
         print("\tStarting " + cmd_str)
 
-        result_file_name = cmd + strategy + ".result.txt"
-        output_file = open(result_file_name, "wb")
-        self.file_name_list[strategy] = result_file_name
-        self.file_list[strategy] = output_file
+        stdout_result_file_name = cmd + strategy + ".stdout.result.txt"
+        stderr_result_file_name = cmd + strategy + ".stderr.result.txt"
+        stdoutput_file = open(stdout_result_file_name, "wb")
+        stderr_file = open(stderr_result_file_name, "wb")
+        self.file_name_list[strategy] = stdout_result_file_name
+        self.file_list[strategy] = (stdoutput_file, stderr_file)
         
-        proc = subprocess.Popen(['run_crown', cmd, str(iteration), strategy], stdout=output_file, stderr=output_file, cwd=cwd_str)
+        proc = subprocess.Popen(['run_crown', cmd, str(iteration), strategy], stdout=stdoutput_file, stderr=stderr_file, cwd=cwd_str)
         self.proc_list[strategy] = (proc, cmd_str)        
 
     """
@@ -86,8 +88,10 @@ class CrownExeHelper:
                 proc_cmd_str = self.proc_list[proc_st][1]
                 if run_flag[proc_st] == True and proc_handle.poll() != None:
                     print("\tFinished %s" % (proc_cmd_str))
-                    self.file_list[proc_st].flush()
-                    self.file_list[proc_st].close()
+                    self.file_list[proc_st][0].flush()
+                    self.file_list[proc_st][0].close()
+                    self.file_list[proc_st][1].flush()
+                    self.file_list[proc_st][1].close()
                     run_flag[proc_st] = False
 
             exit_flag = True
@@ -138,7 +142,10 @@ class CrownExeHelper:
 
             col = 1
             for st in rst.keys():
-                sheet.write(row, col, rst[st][i][1])
+                try:
+                    sheet.write(row, col, rst[st][i][1])
+                except:
+                    sheet.write(row, col, "NA")
                 col = col + 1
 
         wbk.close()
