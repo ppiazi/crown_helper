@@ -143,9 +143,9 @@ class CrownExeHelper:
             col = 1
             for st in rst.keys():
                 try:
-                    sheet.write(row, col, rst[st][i][1])
+                    sheet.write(row, col, int(rst[st][i][1]))
                 except:
-                    sheet.write(row, col, "NA")
+                    sheet.write(row, col, 0)
                 col = col + 1
 
         wbk.close()
@@ -168,6 +168,9 @@ if __name__ == "__main__":
     for op, p in optlist:
         if op == "-f":
             p_target = p
+            # if p_target ends with '/', remove it
+            if p_target[-1] == '/':
+                p_target = p_target[:-1]
         elif op == "-c":
             p_cmd = p
         elif op == "-i":
